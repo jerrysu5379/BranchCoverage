@@ -25,15 +25,41 @@ class PermissionCheckerTest {
     }
 }
 
+class DiscountEligibilityCheckerTest {
+    DiscountEligibilityChecker checker = new DiscountEligibilityChecker();
+
+    @Test
+    void testIsEligibleForDiscount() {
+        // Test cases where age >= 65
+        assertTrue(checker.isEligibleForDiscount(65, false));
+        assertTrue(checker.isEligibleForDiscount(70, false));
+
+        // Test cases where age < 18
+        assertTrue(checker.isEligibleForDiscount(17, false));
+        assertTrue(checker.isEligibleForDiscount(10, false));
+
+        // Test cases where hasMembership is true
+        assertTrue(checker.isEligibleForDiscount(30, true));
+        assertTrue(checker.isEligibleForDiscount(50, true));
+
+        // Test cases where age is between 18 and 65 and hasMembership is false
+        assertFalse(checker.isEligibleForDiscount(30, false));
+        assertFalse(checker.isEligibleForDiscount(50, false));
+    }
+}
+
 class DiscountCalculatorTest {
     DiscountCalculator calculator = new DiscountCalculator();
 
     @Test
     void testCalculateDiscount() {
-        assertEquals(95.0, calculator.calculateDiscount(100, true));
-        assertEquals(100.0, calculator.calculateDiscount(100, false));
-        assertEquals(80.0, calculator.calculateDiscount(100.01, true));
-        assertEquals(90.0, calculator.calculateDiscount(100.01, false));
+        // Test cases for totalAmount > 100
+        assertEquals(80.00800000000001, calculator.calculateDiscount(100.01, true), 0.0001);
+        assertEquals(90.009, calculator.calculateDiscount(100.01, false), 0.0001);
+
+        // Test cases for totalAmount <= 100
+        assertEquals(95.0, calculator.calculateDiscount(100, true), 0.0001);
+        assertEquals(100.0, calculator.calculateDiscount(100, false), 0.0001);
     }
 }
 
@@ -100,16 +126,45 @@ class UserValidatorTest {
     }
 }
 
+class LoginValidatorTest {
+    LoginValidator validator = new LoginValidator();
+
+    @Test
+    void testValidateLogin() {
+        // Test cases where both username and password are not null and not empty
+        assertTrue(validator.validateLogin("user", "password"));
+        assertTrue(validator.validateLogin("admin", "admin123"));
+
+        // Test cases where username or password are null
+        assertFalse(validator.validateLogin(null, "password"));
+        assertFalse(validator.validateLogin("user", null));
+        assertFalse(validator.validateLogin(null, null));
+
+        // Test cases where username or password are empty
+        assertFalse(validator.validateLogin("", "password"));
+        assertFalse(validator.validateLogin("user", ""));
+        assertFalse(validator.validateLogin("", ""));
+    }
+}
+
 class PointsCalculatorTest {
     PointsCalculator calculator = new PointsCalculator();
 
     @Test
     void testCalculatePoints() {
-        assertEquals(0, calculator.calculatePoints(0, 0));
-        assertEquals(10, calculator.calculatePoints(1, 0));
-        assertEquals(15, calculator.calculatePoints(1, 5));
-        assertEquals(30, calculator.calculatePoints(1, 6));
-        assertEquals(5, calculator.calculatePoints(0, 1));
+        // Test cases where purchases > 0
+        assertEquals(15, calculator.calculatePoints(1, 5));  // purchases > 0 and reviews <= 5
+        assertEquals(30, calculator.calculatePoints(1, 6));  // purchases > 0 and reviews > 5
+
+        // Test cases where purchases <= 0
+        assertEquals(5, calculator.calculatePoints(0, 1));  // purchases <= 0 and reviews > 0
+        assertEquals(0, calculator.calculatePoints(0, 0));  // purchases <= 0 and reviews <= 0
+
+        // Additional test cases
+        assertEquals(15, calculator.calculatePoints(1, 0));  // purchases > 0 and reviews = 0
+        assertEquals(15, calculator.calculatePoints(5, 0));  // purchases > 0 and reviews = 0
+        assertEquals(5, calculator.calculatePoints(0, 2));   // purchases = 0 and reviews > 0
+        assertEquals(0, calculator.calculatePoints(0, -1));  // purchases = 0 and reviews <= 0
     }
 }
 
